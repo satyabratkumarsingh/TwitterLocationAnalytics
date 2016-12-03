@@ -1,6 +1,6 @@
 
 
-name := "FirstSparkApplication"
+name := "TwitterLocationAnalytics"
 
 version := "1.0"
 
@@ -13,11 +13,12 @@ libraryDependencies += "com.datastax.spark" %% "spark-cassandra-connector" % "2.
 //libraryDependencies += "org.apache.spark" %% "spark-streaming-twitter" % "2.0.1"
 //libraryDependencies += "org.apache.spark" % "spark-streaming-twitter_2.10" % "1.6.3"
 libraryDependencies += "org.apache.bahir" %% "spark-streaming-twitter" % "2.0.0"
-
+libraryDependencies += "com.typesafe" % "config" % "1.3.1"
 
 
 libraryDependencies += "com.google.code.gson" % "gson" % "2.8.0"
-
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.14"
+libraryDependencies += "org.apache.kafka" % "kafka_2.10" % "0.8.0"
 
 
 resolvers += Resolver.mavenLocal
