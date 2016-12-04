@@ -1,9 +1,11 @@
-package models;
+package models
+
+import java.util.Date
+;
 
 /**
  * Created by Satya on 27/11/2016.
  */
 
-case class Location(latitude : BigDecimal, longitude : BigDecimal)
-case class Tweet(userId: String, text: String, location : Location)
+case class Tweet(userid: String,latitude:BigDecimal,longitude:BigDecimal,tweet:String,tweetdate:Date)
 

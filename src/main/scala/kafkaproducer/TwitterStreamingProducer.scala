@@ -1,12 +1,11 @@
 package kafkaproducer
 import configreader.KafkaConfig
-import models.{Location, Tweet}
+import models.{Tweet}
+import org.apache.kafka.common.serialization.{ByteArrayDeserializer, ByteArraySerializer}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.twitter.TwitterUtils
 import twitter.TwitterHelper
-import serializer.TwitterByteArraySerializer
-
 /**
   * Created by Satya on 03/12/2016.
   */
@@ -15,7 +14,7 @@ object TwitterStreamingProducer extends App {
   val apiSecret = "W0juLHHw9vzBuTaMiFG9e6td8IdIcVd30vSGHd9gt8dbcMmmUW"
   val accessToken="43551820-PthPJRcBeAJXZeFOAnUe68sF5Da5ESM6oI0xabF32"
   val accessTokenSecret ="x10G2lr7Quy9G8XoKUgyxW3idJbjDIFBjAzEzLPA5xIS0"
-  val tweetFilter = Array("Saudi", "America", "India")
+  val tweetFilter = Array("Modi", "India", "Kejriwal","Congress", "Rahul")
   val kafkaTwitterProducer = new KafkaTwitterProducer(KafkaConfig.topic,KafkaConfig.hostName + ":" + KafkaConfig.port)
   private val intervalSecs = 5
 
@@ -31,23 +30,19 @@ object TwitterStreamingProducer extends App {
     var localTweets = tweets.filter(x=> x.getUser != null && x.getText !=null && !x.getText.isEmpty
       && x.getGeoLocation !=null).map(result =>
       {
-             Tweet(result.getUser().getName(),
-          result.getText(),new Location(result.getGeoLocation().getLatitude(),
-            result.getGeoLocation().getLongitude()))
+             Tweet(result.getUser().getName(),result.getGeoLocation().getLatitude(),
+               result.getGeoLocation().getLongitude(),result.getText(),result.getCreatedAt())
 
       })
-    localTweets = localTweets.filter(x=>x.text!=null && !x.text.isEmpty)
+    localTweets = localTweets.filter(x=>x.tweet!=null && !x.tweet.isEmpty)
     localTweets.foreachRDD(rdd=>{
       rdd.collect().foreach(x=>{
-          println("Sending tweet to topic" + x.text)
-          kafkaTwitterProducer.send(TwitterByteArraySerializer.serialize(x))
+          println("Sending tweet to topic" + x.tweet)
+          kafkaTwitterProducer.sendTweetToTopic(x)
       })
     })
 
     ssc.start()
     ssc.awaitTermination()
   }
-
-
-
 }

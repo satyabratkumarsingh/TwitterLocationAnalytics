@@ -2,9 +2,12 @@ package kafkaproducer
 
 import java.util.{Properties, UUID}
 import java.util.Properties
-import kafka.javaapi.producer.Producer
+
 import kafka.message.{DefaultCompressionCodec, NoCompressionCodec}
-import kafka.producer.{KeyedMessage, ProducerConfig}
+import models.Tweet
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
+import org.apache.kafka.common.serialization.ByteArraySerializer
+import serializer.TwitterByteArraySerializer
 
 
 
@@ -20,41 +23,25 @@ case class KafkaTwitterProducer(
                         ) {
 
   val props = new Properties()
-
   val codec = if(compress) DefaultCompressionCodec.codec else NoCompressionCodec.codec
+  props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList)
+  props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+    "org.apache.kafka.common.serialization.ByteArraySerializer")
+  props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+    "org.apache.kafka.common.serialization.StringSerializer")
 
-  props.put("compression.codec", codec.toString)
-  props.put("producer.type", if(synchronously) "sync" else "async")
-  props.put("metadata.broker.list", brokerList)
-  props.put("batch.num.messages", batchSize.toString)
-  props.put("message.send.max.retries", messageSendMaxRetries.toString)
-  props.put("request.required.acks",requestRequiredAcks.toString)
-  props.put("client.id",clientId.toString)
+  val producer = new KafkaProducer[String, Array[Byte]](props)
 
-  val producer = new Producer[AnyRef, AnyRef](new ProducerConfig(props))
 
-  def kafkaMesssage(message: Array[Byte], partition: Array[Byte]): KeyedMessage[AnyRef, AnyRef] = {
-    if (partition == null) {
-      new KeyedMessage(topic,message)
-    } else {
-      new KeyedMessage(topic,partition,message)
-    }
-  }
-
-  def send(message:  Array[Byte]): Unit =
-    send(message, null)
-
-  def send(message: String, partition: String = null): Unit =
-    send(message.getBytes("UTF8"), if (partition == null) null else partition.getBytes("UTF8"))
-
-  def send(message: Array[Byte], partition: Array[Byte]): Unit = {
+  def sendTweetToTopic(tweet:  Tweet): Unit ={
     try {
-      producer.send(kafkaMesssage(message, partition))
+      val message = new ProducerRecord[String, Array[Byte]](topic, null, TwitterByteArraySerializer.serialize(tweet))
+      producer.send(message)
       println("Message submitted")
     } catch {
       case e: Exception =>
         e.printStackTrace
         System.exit(1)
     }
-  }
+   }
 }
