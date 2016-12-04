@@ -18,7 +18,11 @@ libraryDependencies += "com.typesafe" % "config" % "1.3.1"
 
 libraryDependencies += "com.google.code.gson" % "gson" % "2.8.0"
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.14"
-libraryDependencies += "org.apache.kafka" % "kafka_2.10" % "0.8.0"
+libraryDependencies ++= Seq(
+  "org.apache.kafka"           % "kafka_2.11"           % "0.8.2.0",
+  "org.apache.spark" %% "spark-streaming-kafka-0-8" % "2.0.1"
+
+)
 
 
 resolvers += Resolver.mavenLocal

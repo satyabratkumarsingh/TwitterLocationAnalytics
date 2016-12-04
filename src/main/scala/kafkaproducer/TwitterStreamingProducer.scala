@@ -6,7 +6,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.twitter.TwitterUtils
 import twitter.TwitterHelper
 import serializer.TwitterByteArraySerializer
-import utilities.Utilities.StringUtilities
+
 /**
   * Created by Satya on 03/12/2016.
   */
@@ -16,7 +16,7 @@ object TwitterStreamingProducer extends App {
   val accessToken="43551820-PthPJRcBeAJXZeFOAnUe68sF5Da5ESM6oI0xabF32"
   val accessTokenSecret ="x10G2lr7Quy9G8XoKUgyxW3idJbjDIFBjAzEzLPA5xIS0"
   val tweetFilter = Array("Modi", "Kejri", "India")
- // val kafkaTwitterProducer = new KafkaTwitterProducer(KafkaConfig.topic,KafkaConfig.hostName + ":" + KafkaConfig.port)
+  val kafkaTwitterProducer = new KafkaTwitterProducer(KafkaConfig.topic,KafkaConfig.hostName + ":" + KafkaConfig.port)
   private val intervalSecs = 5
 
   startProducingTweets()
@@ -28,8 +28,8 @@ object TwitterStreamingProducer extends App {
     TwitterHelper.configureTwitterCredentials(apiKey, apiSecret, accessToken, accessTokenSecret)
     val ssc = new StreamingContext(sc, Seconds(intervalSecs))
     val tweets = TwitterUtils.createStream(ssc, None,tweetFilter)
-    var localTweets = tweets.filter(x=> x.getUser()!=null && x.getText()!=null
-      && x.getGeoLocation()!=null).map(result =>
+    var localTweets = tweets.filter(x=> x.getUser != null && x.getText !=null && !x.getText.isEmpty
+      && x.getGeoLocation !=null).map(result =>
       {
              Tweet(result.getUser().getName(),
           result.getText(),new Location(result.getGeoLocation().getLatitude(),
@@ -38,13 +38,16 @@ object TwitterStreamingProducer extends App {
       })
     localTweets = localTweets.filter(x=>x.text!=null && !x.text.isEmpty)
     localTweets.foreachRDD(rdd=>{
-      println(rdd.collect().foreach(x=>println(x.text)))
+      rdd.collect().foreach(x=>{
+          println("Sending tweet to topic" + x.text)
+          kafkaTwitterProducer.send(TwitterByteArraySerializer.serialize(x))
+      })
     })
 
     ssc.start()
     ssc.awaitTermination()
   }
 
-  def isNullOrEmpty(x: String) = x == null || x.isEmpty
+
 
 }

@@ -50,6 +50,7 @@ case class KafkaTwitterProducer(
   def send(message: Array[Byte], partition: Array[Byte]): Unit = {
     try {
       producer.send(kafkaMesssage(message, partition))
+      println("Message submitted")
     } catch {
       case e: Exception =>
         e.printStackTrace
