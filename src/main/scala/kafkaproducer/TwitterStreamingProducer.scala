@@ -15,7 +15,7 @@ object TwitterStreamingProducer extends App {
   val apiSecret = "W0juLHHw9vzBuTaMiFG9e6td8IdIcVd30vSGHd9gt8dbcMmmUW"
   val accessToken="43551820-PthPJRcBeAJXZeFOAnUe68sF5Da5ESM6oI0xabF32"
   val accessTokenSecret ="x10G2lr7Quy9G8XoKUgyxW3idJbjDIFBjAzEzLPA5xIS0"
-  val tweetFilter = Array("Modi", "Kejri", "India")
+  val tweetFilter = Array("Saudi", "America", "India")
   val kafkaTwitterProducer = new KafkaTwitterProducer(KafkaConfig.topic,KafkaConfig.hostName + ":" + KafkaConfig.port)
   private val intervalSecs = 5
 

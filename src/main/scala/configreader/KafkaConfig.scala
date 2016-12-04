@@ -14,4 +14,5 @@ object  KafkaConfig {
   def hostName = {config.getString("host")}
   def port = {config.getString("port")}
   def topic = {config.getString("topic")}
+  def zookeeperHost = {config.getString("zookeeperHost")}
 }
