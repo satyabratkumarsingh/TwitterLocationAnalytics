@@ -7,6 +7,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, 
   */
 object TwitterByteArraySerializer {
 
+
     def serialize(value: Any): Array[Byte] = {
       val stream: ByteArrayOutputStream = new ByteArrayOutputStream()
       val oos = new ObjectOutputStream(stream)
